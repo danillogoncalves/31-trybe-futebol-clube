@@ -15,7 +15,8 @@ export default {
       err.name = 'loginError';
       throw err;
     }
-    const token = jwtService.sign(responseUser.toJSON() as IUser);
+    const { username, role } = responseUser;
+    const token = jwtService.sign({ username, role, email } as IUser);
     return token;
   },
   validate: async (authorization: string) => {
@@ -23,7 +24,6 @@ export default {
     const { email } = data as IUserEmail;
     const userService = new UserService();
     const responseUser = await userService.findEmail(email);
-    console.log(responseUser);
     const { role } = responseUser as UserModel;
     return role;
   },

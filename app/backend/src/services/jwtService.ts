@@ -7,8 +7,7 @@ dotenv.config();
 const SECRET = process.env.JWT_SECRET;
 export default {
   sign: (user: IUser) => {
-    const { id, password, ...dataPublic } = user;
-    const token = JWT.sign(dataPublic, SECRET as string);
+    const token = JWT.sign(user, SECRET as string);
     return token;
   },
   verify: (token: string) => {
