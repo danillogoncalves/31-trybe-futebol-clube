@@ -10,8 +10,8 @@ export default class TeamService implements ITeamSercive<TeamModel> {
   findByPk = async (id: number): Promise<TeamModel> => {
     const team = await TeamModel.findByPk(id);
     if (!team) {
-      const err = new Error('Team ID does not exist.');
-      err.name = 'Unauthorized';
+      const err = new Error('There is no team with such id!');
+      err.name = 'notFound';
       throw err;
     }
     return team;
