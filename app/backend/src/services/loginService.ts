@@ -12,7 +12,7 @@ export default {
     const responseUser = await userService.findEmail(email);
     if (!responseUser || !passwordService.compare(password, responseUser.password)) {
       const err = new Error('Incorrect email or password');
-      err.name = 'loginError';
+      err.name = 'Unauthorized';
       throw err;
     }
     const { username, role } = responseUser;
