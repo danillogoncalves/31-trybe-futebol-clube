@@ -1,7 +1,7 @@
 import UserModel from '../database/models/UserModel';
-import { IService } from '../interfaces/IService';
+import { IUserService } from '../interfaces/IUserService';
 
-export default class UserService implements IService<UserModel | null> {
+export default class UserService implements IUserService<UserModel | null> {
   findEmail = async (email: string): Promise<UserModel | null> => {
     const user = await UserModel.findOne({ where: { email } });
     return user;
