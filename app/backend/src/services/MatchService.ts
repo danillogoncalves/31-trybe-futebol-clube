@@ -1,7 +1,7 @@
 import TeamModel from '../database/models/TeamModel';
 import MatchModel from '../database/models/MatchModel';
 import { IMatchService } from '../interfaces/IMatchService';
-import { IMatchReq, MatchFinish } from '../interfaces/IMatch';
+import { IMatchGoals, IMatchReq, MatchFinish } from '../interfaces/IMatch';
 
 export default class MatchService implements IMatchService<MatchModel> {
   findAll = async (): Promise<MatchModel[]> => {
@@ -63,6 +63,19 @@ export default class MatchService implements IMatchService<MatchModel> {
       throw err;
     }
     return { message: 'Finished' };
+  };
+
+  updateGoals = async (id: number, body: IMatchGoals): Promise<IMatchGoals> => {
+    const { homeTeamGoals, awayTeamGoals } = body;
+    const [match] = await MatchModel.update({
+      homeTeamGoals, awayTeamGoals }, { where: { id },
+    });
+    if (!match) {
+      const err = new Error('There is no match with such id or the goals are the same!');
+      err.name = 'notFound';
+      throw err;
+    }
+    return body;
   };
 
   validateTeam = async (id: number): Promise<void> => {

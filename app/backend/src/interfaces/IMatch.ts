@@ -2,11 +2,13 @@ export type MatchFinish = {
   message: 'Finished',
 };
 
-export interface IMatchReq {
-  homeTeam: number,
+export interface IMatchGoals {
   homeTeamGoals: number,
-  awayTeam: number,
   awayTeamGoals: number,
+}
+export interface IMatchReq extends IMatchGoals {
+  homeTeam: number,
+  awayTeam: number,
 }
 
 export interface IMatchRes extends IMatchReq{
