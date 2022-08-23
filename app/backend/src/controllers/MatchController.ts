@@ -5,7 +5,10 @@ import jwtService from '../services/jwtService';
 export default class MatchController {
   constructor(private matchService: MatchService) {}
   findAll = async (req: Request, res: Response): Promise<void> => {
-    if (req.query.inProgress) await this.findAllInProcess(req, res);
+    if (req.query.inProgress) {
+      const result = this.findAllInProcess(req, res);
+      return result;
+    }
     const matches = await this.matchService.findAll();
     res.status(200).json(matches);
   };
@@ -19,7 +22,11 @@ export default class MatchController {
   create = async (req: Request, res: Response): Promise<void> => {
     const { homeTeam, awayTeam } = req.body;
     const { authorization } = req.headers;
-    if (!authorization) throw new Error();
+    if (!authorization) {
+      const err = new Error('Token not found!');
+      err.name = 'Unauthorized';
+      throw err;
+    }
     jwtService.verify(authorization as string);
     if (homeTeam === awayTeam) {
       const err = new Error('It is not possible to create a match with two equal teams');

@@ -60,7 +60,7 @@ describe('Login', () => {
         .send(loginMock);
       expect(response.status).to.be.equal(200)
     })
-    it('Acesso com dados válidos no front-end, retirna token correto.', async () => {
+    it('Acesso com dados válidos no front-end, retorna token correto.', async () => {
       const response = await chai.request(app)
         .post('/login')
         .send(loginMock);
