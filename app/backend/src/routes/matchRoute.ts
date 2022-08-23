@@ -7,6 +7,8 @@ const matchRoute = express.Router();
 const matchService = new MatchService();
 const matchController = new MatchController(matchService);
 
+matchRoute.post('/', matchController.create);
 matchRoute.get('/', matchController.findAll);
+matchRoute.patch('/:id/finish', matchController.finish);
 
 export default matchRoute;

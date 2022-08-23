@@ -11,7 +11,13 @@ export default {
     return token;
   },
   verify: (token: string) => {
-    const data = JWT.verify(token, SECRET as string);
-    return data;
+    try {
+      const data = JWT.verify(token, SECRET as string);
+      return data;
+    } catch (_error) {
+      const err = new Error('Token must be a valid token');
+      err.name = 'Unauthorized';
+      throw err;
+    }
   },
 };
