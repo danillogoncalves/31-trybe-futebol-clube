@@ -32,13 +32,11 @@ export default class LeaderboardsService {
 
   private victoryLoseDraw = (
     acc: ILeaderboard,
-    match: IMatch,
-    matchPoints: (arg0: number, arg1: number) => 0 | 1 | 3,
+    matchPoints: 0 | 1 | 3,
   ) => {
-    const result = matchPoints(match.homeTeamGoals, match.awayTeamGoals);
-    if (result === 0) acc.totalLosses += 1;
-    if (result === 1) acc.totalDraws += 1;
-    if (result === 3) acc.totalVictories += 1;
+    if (matchPoints === 0) acc.totalLosses += 1;
+    if (matchPoints === 1) acc.totalDraws += 1;
+    if (matchPoints === 3) acc.totalVictories += 1;
   };
 
   private leaderboardsHomeTeams = async () => {
@@ -52,9 +50,30 @@ export default class LeaderboardsService {
           lb.name = teamName;
           lb.totalPoints += this.matchPoints(match.homeTeamGoals, match.awayTeamGoals);
           lb.totalGames += 1;
-          this.victoryLoseDraw(lb, match, this.matchPoints);
+          this.victoryLoseDraw(lb, this.matchPoints(match.homeTeamGoals, match.awayTeamGoals));
           lb.goalsFavor += match.homeTeamGoals;
           lb.goalsOwn += match.awayTeamGoals;
+          lb.goalsBalance = lb.goalsFavor - lb.goalsOwn;
+          lb.efficiency = ((lb.totalPoints / (lb.totalGames * 3)) * 100).toFixed(2);
+        }
+        return lb;
+      }, initialLeaderboard as ILeaderboard));
+  };
+
+  private leaderboardsAwayTeams = async () => {
+    const allTeams = await this.allTeams();
+    const finishedMatches = await this.finishedMatches();
+    return allTeams.map(({ teamName }) => finishedMatches
+      .reduce((acc, curr) => {
+        const lb = { ...acc };
+        const match = curr as unknown as IMatch;
+        if (teamName === match.teamAway.teamName) {
+          lb.name = teamName;
+          lb.totalPoints += this.matchPoints(match.awayTeamGoals, match.homeTeamGoals);
+          lb.totalGames += 1;
+          this.victoryLoseDraw(lb, this.matchPoints(match.awayTeamGoals, match.homeTeamGoals));
+          lb.goalsFavor += match.awayTeamGoals;
+          lb.goalsOwn += match.homeTeamGoals;
           lb.goalsBalance = lb.goalsFavor - lb.goalsOwn;
           lb.efficiency = ((lb.totalPoints / (lb.totalGames * 3)) * 100).toFixed(2);
         }
@@ -66,6 +85,9 @@ export default class LeaderboardsService {
     let result: ILeaderboard[] = [];
     if (filter === '/home') {
       result = await this.leaderboardsHomeTeams();
+    }
+    if (filter === '/away') {
+      result = await this.leaderboardsAwayTeams();
     }
     result.sort((teamPrev: ILeaderboard, teamCurr: ILeaderboard) => {
       let confrontation = teamCurr.totalPoints - teamPrev.totalPoints;
