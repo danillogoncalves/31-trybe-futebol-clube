@@ -10,13 +10,11 @@ import TeamModel from '../database/models/TeamModel';
 
 // import Example from '../database/models/ExampleModel';
 
-import { Response } from 'superagent';
+// import { Response } from 'superagent';
 
 chai.use(chaiHttp);
 
 const { expect } = chai;
-
-const test = [ 1 ]
 
 describe('Matches', () => {
   describe('/matches', () => {
