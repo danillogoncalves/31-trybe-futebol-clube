@@ -44,7 +44,7 @@ export default class LeaderboardsService {
     const finishedMatches = await this.finishedMatches();
     return allTeams.map(({ teamName }) => finishedMatches
       .reduce((acc, curr) => {
-        const lb = { ...acc };
+        const lb: ILeaderboard = { ...acc };
         const match = curr as unknown as IMatch;
         if (teamName === match.teamHome.teamName) {
           lb.name = teamName;
@@ -65,7 +65,7 @@ export default class LeaderboardsService {
     const finishedMatches = await this.finishedMatches();
     return allTeams.map(({ teamName }) => finishedMatches
       .reduce((acc, curr) => {
-        const lb = { ...acc };
+        const lb: ILeaderboard = { ...acc };
         const match = curr as unknown as IMatch;
         if (teamName === match.teamAway.teamName) {
           lb.name = teamName;
@@ -81,14 +81,32 @@ export default class LeaderboardsService {
       }, initialLeaderboard as ILeaderboard));
   };
 
+  private leaderboardsTeams = async () => {
+    const resultInHome = await this.leaderboardsHomeTeams();
+    const resultInAway = await this.leaderboardsAwayTeams();
+    return resultInHome.map((home) => resultInAway.reduce((acc, curr) => {
+      const lbHome = { ...acc };
+      const lbAway = curr as unknown as ILeaderboard;
+      if (lbHome.name === lbAway.name) {
+        lbHome.totalPoints += lbAway.totalPoints;
+        lbHome.totalGames += lbAway.totalGames;
+        lbHome.totalVictories += lbAway.totalVictories;
+        lbHome.totalDraws += lbAway.totalDraws;
+        lbHome.totalLosses += lbAway.totalLosses;
+        lbHome.goalsFavor += lbAway.goalsFavor;
+        lbHome.goalsOwn += lbAway.goalsOwn;
+        lbHome.goalsBalance = lbHome.goalsFavor - lbHome.goalsOwn;
+        lbHome.efficiency = ((lbHome.totalPoints / (lbHome.totalGames * 3)) * 100).toFixed(2);
+      }
+      return lbHome;
+    }, home));
+  };
+
   public getLeaderboard = async (filter: string) => {
     let result: ILeaderboard[] = [];
-    if (filter === '/home') {
-      result = await this.leaderboardsHomeTeams();
-    }
-    if (filter === '/away') {
-      result = await this.leaderboardsAwayTeams();
-    }
+    if (filter === '/home') result = await this.leaderboardsHomeTeams();
+    if (filter === '/away') result = await this.leaderboardsAwayTeams();
+    if (filter === '/') result = await this.leaderboardsTeams();
     result.sort((teamPrev: ILeaderboard, teamCurr: ILeaderboard) => {
       let confrontation = teamCurr.totalPoints - teamPrev.totalPoints;
       if (!confrontation) confrontation = teamCurr.totalVictories - teamPrev.totalVictories;
